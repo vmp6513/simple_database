@@ -5,7 +5,7 @@
 
 // Ch2: Compiler and Virtual Machine.
 /* FAQ: 1. describe the program logic;
-*/
+ */
 
 typedef enum {
     META_COMMAND_SUCCESS,
@@ -28,7 +28,7 @@ typedef struct {
 
 InputBuffer* new_input_buffer() {
     // dynamic allocation
-    InputBuffer* buffer = malloc(sizeof(InputBuffer));
+    InputBuffer* buffer = (InputBuffer*)malloc(sizeof(InputBuffer));
     memset(buffer, 0, sizeof(buffer));
     return buffer;
 }

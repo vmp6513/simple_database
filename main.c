@@ -3,12 +3,22 @@
 #include <string.h>
 #include <unistd.h>
 
-// Ch1: making a simple REPL(Read-Execute-Print Loop, similar to a shell).
-/* FAQ: 1. 'malloc' underlying principle;
-        2. 'getline';
-        3. the effect of 'fflush';
-        4. exit & return;
+// Ch2: Compiler and Virtual Machine.
+/* FAQ: 1. describe the program logic;
 */
+
+typedef enum {
+    META_COMMAND_SUCCESS,
+    META_COMMAND_UNRECOGNIZED_COMMAND
+} MetaCommandResult;
+
+typedef enum { PREPARE_SUCCESS, PREPARE_UNRECOGNIZED_STATEMENT } PrepareResult;
+
+typedef enum { STATEMENT_INSERT, STATEMENT_SELECT } StatementType;
+
+typedef struct {
+    StatementType type;
+} Statement;
 
 typedef struct {
     char* buffer;
@@ -60,6 +70,37 @@ void read_input(InputBuffer* input_buffer) {
     input_buffer->buffer[bytes_read - 1] = '\0';
 }
 
+MetaCommandResult do_meta_command(InputBuffer* input_buffer) {
+    if (0 == strcmp(input_buffer->buffer, ".exit")) {
+        exit(EXIT_SUCCESS);
+    } else {
+        return META_COMMAND_UNRECOGNIZED_COMMAND;
+    }
+}
+
+PrepareResult prepare_statement(InputBuffer* input_buffer,
+                                Statement* statement) {
+    if (strncmp(input_buffer->buffer, "insert", 6) == 0) {
+        statement->type = STATEMENT_INSERT;
+        return PREPARE_SUCCESS;
+    }
+    if (strcmp(input_buffer->buffer, "select") == 0) {
+        statement->type = STATEMENT_SELECT;
+        return PREPARE_SUCCESS;
+    }
+
+    return PREPARE_UNRECOGNIZED_STATEMENT;
+}
+void execute_statement(Statement* statement) {
+    switch (statement->type) {
+        case (STATEMENT_INSERT):
+            printf("This is where we would do an insert.\n");
+            break;
+        case (STATEMENT_SELECT):
+            printf("This is where we would do a select.\n");
+            break;
+    }
+}
 int main(int argc, char* argv[]) {
     // define a input buffer
     InputBuffer* input_buffer = new_input_buffer();
@@ -68,11 +109,27 @@ int main(int argc, char* argv[]) {
         print_prompt();
         read_input(input_buffer);
 
-        if (0 == strcmp(input_buffer->buffer, "exit")) {
-            close_input_buffer(input_buffer);
-            exit(EXIT_SUCCESS);
-        } else {
-            printf("Unrecognized command '%s'.\n", input_buffer->buffer);
+        if (input_buffer->buffer[0] == '.') {
+            switch (do_meta_command(input_buffer)) {
+                case META_COMMAND_SUCCESS:
+                    continue;
+                case META_COMMAND_UNRECOGNIZED_COMMAND:
+                    printf("Unrecognized command %s.\n", input_buffer->buffer);
+                    continue;
+            }
         }
+
+        Statement statement;
+        switch (prepare_statement(input_buffer, &statement)) {
+            case PREPARE_SUCCESS:
+                break;
+            case PREPARE_UNRECOGNIZED_STATEMENT:
+                printf("Unrecognized keyword at start of '%s'.\n",
+                       input_buffer->buffer);
+                continue;
+        }
+
+        execute_statement(&statement);
+        printf("Executed.\n");
     }
 }

@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 // Ch3: An In-Memory, Append-Only, Single-Table, Hard-coded Database.
-/* FAQ: 1. describe the model and framework
+/* FAQ: 1. describe the model and framework (row&table&page)
         2. how to understand the 'statement'
  */
 
@@ -24,8 +24,8 @@ typedef enum { STATEMENT_INSERT, STATEMENT_SELECT } StatementType;
 
 typedef enum { EXECUTE_SUCCESS, EXECUTE_TABLE_FULL } ExecuteResult;
 
-#define COLUMN_USERNAME_SIZE 32
-#define COLUMN_EMAIL_SIZE 255
+const uint16_t COLUMN_USERNAME_SIZE = 32;
+const uint32_t COLUMN_EMAIL_SIZE = 255;
 
 typedef struct {
     uint32_t id;
@@ -63,15 +63,15 @@ void print_row(Row* row) {
 
 // store in page
 void serialize_row(Row* source, void* dest) {
-    memcpy(dest + ID_OFFSET, &(source->id), ID_SIZE);
-    memcpy(dest + USERNAME_OFFSET, &(source->username), USERNAME_SIZE);
-    memcpy(dest + EMAIL_OFFSET, &(source->email), EMAIL_SIZE);
+    memcpy((void*)(dest + ID_OFFSET), &(source->id), ID_SIZE);
+    memcpy((void*)(dest + USERNAME_OFFSET), &(source->username), USERNAME_SIZE);
+    memcpy((void*)(dest + EMAIL_OFFSET), &(source->email), EMAIL_SIZE);
 }
 // fetch from page
 void deserialize_row(void* source, Row* dest) {
-    memcpy(&(dest->id), source + ID_OFFSET, ID_SIZE);
-    memcpy(&(dest->username), source + USERNAME_OFFSET, USERNAME_SIZE);
-    memcpy(&(dest->email), source + EMAIL_OFFSET, EMAIL_SIZE);
+    memcpy(&(dest->id), (void*)(source + ID_OFFSET), ID_SIZE);
+    memcpy(&(dest->username), (void*)(source + USERNAME_OFFSET), USERNAME_SIZE);
+    memcpy(&(dest->email), (void*)(source + EMAIL_OFFSET), EMAIL_SIZE);
 }
 
 // read/write a row by a pointer
@@ -247,6 +247,7 @@ int main(int argc, char* argv[]) {
         switch (execute_statement(&statement, table)) {
             case EXIT_SUCCESS:
                 printf("Executed.\n");
+                break;
             case EXECUTE_TABLE_FULL:
                 printf("Error: Table full.\n");
                 break;

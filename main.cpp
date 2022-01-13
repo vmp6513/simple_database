@@ -9,6 +9,9 @@
 // Ch6: The Cursor Abstraction.
 /* 1.
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     META_COMMAND_SUCCESS,
@@ -430,3 +433,7 @@ int main(int argc, char* argv[]) {
         }
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

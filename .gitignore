@@ -32,3 +32,6 @@
 *.app
 run
 main
+
+# DB file
+*.db

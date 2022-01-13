@@ -108,15 +108,17 @@ void print_row(Row* row) {
 
 // store in page
 void serialize_row(Row* source, void* dest) {
-    memcpy((void*)(dest + ID_OFFSET), &(source->id), ID_SIZE);
-    memcpy((void*)(dest + USERNAME_OFFSET), &(source->username), USERNAME_SIZE);
-    memcpy((void*)(dest + EMAIL_OFFSET), &(source->email), EMAIL_SIZE);
+    memcpy((void*)((char*)(dest) + ID_OFFSET), &(source->id), ID_SIZE);
+    memcpy((void*)((char*)(dest) + USERNAME_OFFSET), &(source->username),
+           USERNAME_SIZE);
+    memcpy((void*)((char*)(dest) + EMAIL_OFFSET), &(source->email), EMAIL_SIZE);
 }
 // fetch from page
 void deserialize_row(void* source, Row* dest) {
-    memcpy(&(dest->id), (void*)(source + ID_OFFSET), ID_SIZE);
-    memcpy(&(dest->username), (void*)(source + USERNAME_OFFSET), USERNAME_SIZE);
-    memcpy(&(dest->email), (void*)(source + EMAIL_OFFSET), EMAIL_SIZE);
+    memcpy(&(dest->id), (void*)((char*)(source) + ID_OFFSET), ID_SIZE);
+    memcpy(&(dest->username), (void*)((char*)(source) + USERNAME_OFFSET),
+           USERNAME_SIZE);
+    memcpy(&(dest->email), (void*)((char*)(source) + EMAIL_OFFSET), EMAIL_SIZE);
 }
 
 void* get_page(Pager* pager, uint32_t page_num) {
@@ -153,7 +155,7 @@ void* cursor_value(Cursor* cursor) {
     void* page = get_page(cursor->table->pager, page_num);
     uint32_t row_offset = cursor->row_num % ROWS_PER_PAGE;
     uint32_t byte_offset = row_offset * ROW_SIZE;
-    return page + byte_offset;
+    return (void*)((char*)(page) + byte_offset);
 }
 
 Pager* page_open(const char* filename) {
